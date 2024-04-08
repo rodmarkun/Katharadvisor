@@ -25,17 +25,22 @@ def generate_memory_graph(data):
     plt.show()
 
 def generate_diskio_graph(data):
-    """Genera y muestra un gráfico con los datos de I/O de disco recopilados."""
+    """Genera y muestra un gráfico con los datos de I/O de disco recopilados, en Megabytes."""
     plt.figure(figsize=(10, 5))
-    plt.plot(data["timestamps"], data["disk_read_bytes"], label='Disk Read Bytes', marker='o')
-    plt.plot(data["timestamps"], data["disk_write_bytes"], label='Disk Write Bytes', linestyle='--', marker='x')
+    # Conversión de bytes a Megabytes para una mejor visualización
+    disk_read_mb = [bytes / (1024**2) for bytes in data["disk_read_bytes"]]
+    disk_write_mb = [bytes / (1024**2) for bytes in data["disk_write_bytes"]]
+    
+    plt.plot(data["timestamps"], disk_read_mb, label='Disk Read (MB)', marker='o')
+    plt.plot(data["timestamps"], disk_write_mb, label='Disk Write (MB)', linestyle='--', marker='x')
     plt.xlabel('Time (HH:MM:SS)')
-    plt.ylabel('Disk I/O Bytes')
+    plt.ylabel('Disk I/O (MB)')
     plt.title('Disk I/O Over Time')
     plt.legend()
     plt.xticks(rotation=45)
     plt.tight_layout()
     plt.show()
+
 
 def generate_network_graph(data):
     """Genera y muestra un gráfico con los datos de red recopilados."""

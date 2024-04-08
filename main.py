@@ -3,6 +3,7 @@ import constants
 import subprocess
 import time
 import plots
+import csv
 from datetime import datetime
 
 def fetch_and_store_data(container_id, container_data):
@@ -48,7 +49,29 @@ def fetch_and_store_data(container_id, container_data):
     else:
         print(f"Error fetching stats data: {response_stats.status_code}")
 
-    
+
+def export_data_to_csv(container_data, filename="container_metrics.csv"):
+    with open(filename, mode='w', newline='') as file:
+        writer = csv.writer(file)
+        # Escribe los encabezados
+        headers = ["timestamp", "cpu_usage_latest", "memory_usage_gb_latest", "disk_read_bytes", "disk_write_bytes", "network_rx_bytes", "network_tx_bytes"]
+        writer.writerow(headers)
+        
+        # Escribe los datos
+        for i in range(len(container_data["timestamps"])):
+            row = [
+                container_data["timestamps"][i],
+                container_data["cpu_usages_latest"][i],
+                container_data["memory_usages_gb_latest"][i],
+                container_data["disk_read_bytes"][i],
+                container_data["disk_write_bytes"][i],
+                container_data["network_rx_bytes"][i],
+                container_data["network_tx_bytes"][i]
+            ]
+            writer.writerow(row)
+
+
+
 def main():
     container_data = {"timestamps": [],
             "cpu_usages_latest": [],
@@ -79,6 +102,7 @@ def main():
             plots.generate_memory_graph(container_data)
             plots.generate_diskio_graph(container_data)
             plots.generate_network_graph(container_data)
+            export_data_to_csv(container_data, filename=f"data/data-{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.csv")
             result = subprocess.run(f"cd {constants.KATHARA_SCENARIO_PATH} && {constants.KATHARA_DESTROY_COMMAND}", shell=True, check=True, text=True)
             print(f"Successfully destroyed Kathara environment: {result}")
         else:
@@ -88,4 +112,5 @@ def main():
         print(f"Error in command: {e}")
 
 if __name__ == '__main__':
-    main()
+    for _ in range(3):
+        main()
