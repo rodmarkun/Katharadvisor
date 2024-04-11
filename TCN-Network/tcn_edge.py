@@ -12,10 +12,10 @@ from tcn import TCN, tcn_full_summary
 import matplotlib.pyplot as plt
 
 # Definir las rutas a las carpetas de grupo de características y etiquetas, y test
-GROUP_FEATURES_PATH = '/path/to/your/features/group/folder'
-GROUP_LABELS_PATH = '/path/to/your/labels/group/folder'
-TEST_FEATURES_PATH = '/path/to/your/test/features'
-TEST_LABELS_PATH = '/path/to/your/test/labels'
+GROUP_FEATURES_PATH = 'data/benchmark/virtual/interpolated'
+GROUP_LABELS_PATH = 'data/benchmark/real'
+TEST_FEATURES_PATH = 'data/benchmark/test/kdata-10_interpolated.csv'
+TEST_LABELS_PATH = 'data/benchmark/test/data-2024-04-10-12%3A07%3A42.csv'
 
 # Función para cargar y preprocesar datos
 def load_and_preprocess_csv(feature_csv_path, label_csv_path):
@@ -45,7 +45,7 @@ def process_group(feature_folder_path, label_folder_path):
 training_features, training_labels = process_group(GROUP_FEATURES_PATH, GROUP_LABELS_PATH)
 
 # Asume un solo archivo de test para características y etiquetas
-test_features_scaled, test_labels = load_and_preprocess_csv(os.path.join(TEST_FEATURES_PATH, 'your_test_feature.csv'), os.path.join(TEST_LABELS_PATH, 'your_test_label.csv'))
+test_features_scaled, test_labels = load_and_preprocess_csv(TEST_FEATURES_PATH, TEST_LABELS_PATH)
 
 # Reshape para TCN
 training_features_reshaped = training_features.reshape((training_features.shape[0], training_features.shape[1], 1))
@@ -66,31 +66,31 @@ class TCNHyperModel(HyperModel):
     def build(self, hp):
         model = Sequential([
             TCN(input_shape=self.input_shape,
-                nb_filters=hp.Int('nb_filters', min_value=64, max_value=256, step=64),
-                kernel_size=hp.Choice('kernel_size', values=[2, 3, 6]),
+                nb_filters=hp.Int('nb_filters', min_value=32, max_value=512, step=32),
+                kernel_size=hp.Choice('kernel_size', values=[2, 3, 6, 8]),
                 padding='same',
                 dilations=[1, 2, 4, 8]),
             Dense(self.output_dim)
         ])
-        model.compile(optimizer=Adam(hp.Float('learning_rate', 1e-4, 1e-3, sampling='log')),
+        model.compile(optimizer=Adam(hp.Float('learning_rate', 1e-4, 1e-2, sampling='log')),
                       loss='mean_squared_error')
         return model
 
 # Model training and tuning for CPU
 cpu_hypermodel = TCNHyperModel(input_shape=(training_features_reshaped.shape[1], 1), output_dim=1)
-cpu_tuner = RandomSearch(cpu_hypermodel, objective='val_loss', max_trials=4, executions_per_trial=1, directory='my_dir', project_name='tcn_cpu')
-cpu_tuner.search(training_features_reshaped, training_cpu_labels, epochs=50, validation_split=0.2)
+cpu_tuner = RandomSearch(cpu_hypermodel, objective='val_loss', max_trials=10, executions_per_trial=1, directory='my_dir', project_name='tcn_cpu')
+cpu_tuner.search(training_features_reshaped, training_cpu_labels, epochs=20, validation_split=0.1)
 best_cpu_hps = cpu_tuner.get_best_hyperparameters(num_trials=1)[0]
 cpu_model = cpu_tuner.hypermodel.build(best_cpu_hps)
-cpu_model.fit(training_features_reshaped, training_cpu_labels, epochs=50, validation_split=0.2)
+cpu_model.fit(training_features_reshaped, training_cpu_labels, epochs=100, validation_split=0.1)
 
 # Model training and tuning for Memory
 memory_hypermodel = TCNHyperModel(input_shape=(training_features_reshaped.shape[1], 1), output_dim=1)
-memory_tuner = RandomSearch(memory_hypermodel, objective='val_loss', max_trials=4, executions_per_trial=1, directory='my_dir', project_name='tcn_memory')
-memory_tuner.search(training_features_reshaped, training_memory_labels, epochs=50, validation_split=0.2)
+memory_tuner = RandomSearch(memory_hypermodel, objective='val_loss', max_trials=10, executions_per_trial=1, directory='my_dir', project_name='tcn_memory')
+memory_tuner.search(training_features_reshaped, training_memory_labels, epochs=20, validation_split=0.1)
 best_memory_hps = memory_tuner.get_best_hyperparameters(num_trials=1)[0]
 memory_model = memory_tuner.hypermodel.build(best_memory_hps)
-memory_model.fit(training_features_reshaped, training_memory_labels, epochs=50, validation_split=0.2)
+memory_model.fit(training_features_reshaped, training_memory_labels, epochs=100, validation_split=0.1)
 
 # Evaluation for CPU model
 cpu_test_loss = cpu_model.evaluate(test_features_reshaped, test_cpu_labels, verbose=1)
