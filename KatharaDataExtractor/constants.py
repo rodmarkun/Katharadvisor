@@ -1,9 +1,9 @@
 # CONFIGURE:
 KATHARA_SCENARIO_PATH = "/home/pablospilab/Pascal/spilab-pascal-769625c67efb/monitest"
 KATHARA_DEVICE_NAME = "device1" 
-KATHARA_IMAGE = "pascal/android"
+KATHARA_IMAGE = "pascal/debian"
 CADVISOR_DEPLOYMENT = "localhost:8080"
-SAMPLING_RATE = 1.5 # In seconds, minimum: 1
+SAMPLING_RATE = 1 # In seconds, minimum: 1
 SAMPLING_TIME = 60 # In seconds, minimum: 1
 
 # NO NEED TO CHANGE:

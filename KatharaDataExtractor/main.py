@@ -98,10 +98,10 @@ def main():
                 fetch_and_store_data(container_id, container_data)
                 time.sleep(constants.SAMPLING_RATE)
 
-            plots.generate_cpu_graph(container_data)
-            plots.generate_memory_graph(container_data)
-            plots.generate_diskio_graph(container_data)
-            plots.generate_network_graph(container_data)
+            #plots.generate_cpu_graph(container_data)
+            #plots.generate_memory_graph(container_data)
+            #plots.generate_diskio_graph(container_data)
+            #plots.generate_network_graph(container_data)
             export_data_to_csv(container_data, filename=f"data/data-{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.csv")
             result = subprocess.run(f"cd {constants.KATHARA_SCENARIO_PATH} && {constants.KATHARA_DESTROY_COMMAND}", shell=True, check=True, text=True)
             print(f"Successfully destroyed Kathara environment: {result}")
@@ -112,5 +112,5 @@ def main():
         print(f"Error in command: {e}")
 
 if __name__ == '__main__':
-    for _ in range(3):
+    for _ in range(1):
         main()
