@@ -1,0 +1,40 @@
+# Usa una imagen base de Ubuntu
+FROM ubuntu:20.04
+
+# Evita la interacción con el usuario al instalar paquetes
+ARG DEBIAN_FRONTEND=noninteractive
+
+# Instala Java OpenJDK 17, wget, unzip para la configuración del SDK, y git para clonar proyectos
+RUN apt-get update && \
+    apt-get install -y openjdk-17-jdk wget unzip git && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Establece variables de entorno para el SDK de Android
+ENV ANDROID_SDK_ROOT /opt/android-sdk-linux
+
+# Descarga e instala el Android Commandline Tools
+RUN mkdir -p ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    wget -q https://dl.google.com/android/repository/commandlinetools-linux-8512546_latest.zip -O cmdline-tools.zip && \
+    unzip -q cmdline-tools.zip -d ${ANDROID_SDK_ROOT}/cmdline-tools && \
+    rm cmdline-tools.zip && \
+    mv ${ANDROID_SDK_ROOT}/cmdline-tools/cmdline-tools ${ANDROID_SDK_ROOT}/cmdline-tools/latest
+
+# Añade las herramientas del SDK al PATH
+ENV PATH ${PATH}:${ANDROID_SDK_ROOT}/platform-tools:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin
+
+# Acepta las licencias de Android SDK antes de instalar cualquier componente
+RUN yes | sdkmanager --licenses
+
+# Instala las herramientas básicas del SDK
+RUN sdkmanager "platform-tools" "build-tools;30.0.3" "platforms;android-30"
+
+# Clona un proyecto Android de muestra
+RUN git clone https://github.com/android/sunflower.git /usr/src/myapp
+WORKDIR /usr/src/myapp
+
+# Configura el entorno para ejecutar Gradle
+RUN ./gradlew wrapper
+
+# Comando para construir el proyecto Android
+CMD ["./gradlew", "assembleDebug"]

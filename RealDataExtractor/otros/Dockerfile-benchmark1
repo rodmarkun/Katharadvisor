@@ -1,0 +1,11 @@
+# Usa una imagen base de Debian
+FROM debian:bullseye-slim
+
+# Instala iputils-ping para disponer del comando ping
+RUN apt-get update && \
+    apt-get install -y iputils-ping && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Comando para ejecutar ping a google.com cada 5 segundos
+CMD while true; do ping -c 1 google.com; sleep 5; done

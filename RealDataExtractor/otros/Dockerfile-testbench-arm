@@ -1,0 +1,18 @@
+FROM arm64v8/debian:buster
+
+# Instala las dependencias necesarias para compilar sysbench
+RUN apt-get update && \
+    apt-get install -y git automake autoconf libtool make libssl-dev libmariadb-dev pkg-config && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+
+# Clona el repositorio de sysbench, configura sin soporte para MySQL, y compila el c�digo fuente
+RUN git clone https://github.com/akopytov/sysbench.git && \
+    cd sysbench && \
+    ./autogen.sh && \
+    ./configure --without-mysql && \
+    make -j$(nproc) && \
+    make install
+
+# Ejecuta un benchmark de CPU al iniciar el contenedor
+CMD ["sysbench", "cpu", "--cpu-max-prime=20000", "--threads=4", "run"]

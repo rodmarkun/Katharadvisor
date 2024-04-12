@@ -1,0 +1,8 @@
+FROM arm64v8/debian:buster
+
+# Actualizar repositorios e instalar stress
+RUN apt-get update && \
+    apt-get install -y stress
+
+# Comando para iniciar el contenedor y aplicar carga
+CMD ["stress", "--cpu", "4", "--io", "3", "--vm", "4", "--vm-bytes", "1024M"]
