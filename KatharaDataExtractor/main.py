@@ -98,38 +98,36 @@ def main():
                 fetch_and_store_data(container_id, container_data)
                 time.sleep(constants.SAMPLING_RATE)
 
-                print("Mostrando el escenario:")
-                result_linfo = subprocess.run(f"cd {constants.KATHARA_SCENARIO_PATH} && {constants.KATHARA_LINFO_COMMAND}", shell=True, check=True, text=True)
-                print(f"{constants.KATHARA_LINFO_COMMAND} executed succesfully: {result_linfo}")
-                
-                time_to_run_apipecker = 10  # Este es el segundo concreto después de comenzar el proceso.
-                while time.time() - start_time < time_to_run_apipecker:
-                    print("Waiting for apipecker")
-                    time.sleep(1)  # Espera 1 segundo antes de verificar de nuevo.
+                # Dejamos esto asi para sacar pruebas
+                if (time.time() - start_time) < 32 and (time.time() - start_time) > 30:
+                    print("\n########## Entering apipecker part ##########\n")
+                    try:
 
-                # Ejecuta apipecker usando subprocess.
-                print("##### Executing apipecker ####")
-                """
-                print("-> Conectando con s1")
-                result_connect = subprocess.run(f"cd {constants.KATHARA_SCENARIO_PATH} && {constants.KATHARA_CONNECT_S1_COMMAND} && {constants.APIPECKER_COMMAND}", shell=True, check=True, text=True)
-                print(f"{constants.KATHARA_CONNECT_S1_COMMAND} executed succesfully: {result_connect}")
-                """
-                
-                try:
-                    exec_result = subprocess.run(constants.KATHARA_EXEC_COMMAND, shell=True, check=True, text=True, capture_output=True)
-                    print(exec_result.stdout)
-                    if result.stderr:
-                        print(f"Error: {result.stderr}")
-                    print(f"{constants.KATHARA_EXEC_COMMAND} executed successfully: {exec_result}")
-                except subprocess.CalledProcessError as e:
-                    print(f"Error executing command in Kathara device: {e}")
-                
-                """
-                apipecker_command = "npx apipecker 2 3 500 http://8.0.1.2 -v"
-                result_apipecker = subprocess.run(apipecker_command, shell=True, check=True, text=True, capture_output=True)
-                print(result_apipecker.stdout)
-                """
-                
+                        print("##### Showing the scenario #####")
+                        result_linfo = subprocess.run(f"cd {constants.KATHARA_SCENARIO_PATH} && {constants.KATHARA_LINFO_COMMAND}", shell=True, check=True, text=True)
+                        print(f"{constants.KATHARA_LINFO_COMMAND} executed succesfully: {result_linfo}")
+
+                        print("##### Executing apipecker #####")
+                        exec_result = subprocess.run(constants.KATHARA_EXEC_COMMAND, shell=True, check=True, text=True, capture_output=True)
+                        # exec_result.stdout has the data I need
+                        output_lines = exec_result.stdout.strip().split('\n')
+
+                        # Saving apipecker result in the csv file
+                        with open(f"./data/apipecker-{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.csv", mode='w', newline='') as file:
+                            writer = csv.writer(file)
+                            for line in output_lines:
+                                # Aquí asumimos que cada línea de la salida se puede dividir en columnas para el CSV
+                                # Deberás ajustar el delimitador y el procesamiento según la salida real de apipecker
+                                writer.writerow(line.split())  # Reemplaza split() con el método de procesamiento adecuado
+
+                        print(f"Output saved to apipecker_output.csv")
+                        print(exec_result.stdout)
+                        if result.stderr:
+                            print(f"Error: {result.stderr}")
+                        print(f"{constants.KATHARA_EXEC_COMMAND} executed successfully: {exec_result}")
+                    except subprocess.CalledProcessError as e:
+                        print(f"Error executing command in Kathara device: {e}")
+
             #plots.generate_cpu_graph(container_data)
             #plots.generate_memory_graph(container_data)
             #plots.generate_diskio_graph(container_data)
