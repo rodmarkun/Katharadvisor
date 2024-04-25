@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 import os
 
 # Definir la carpeta de la que leeremos los archivos CSV
-FOLDER_PATH = './data/benchmark/virtual/interpolated'
+FOLDER_PATH = './data/benchmark/real/sysbench'
 
 # Definir las columnas para las cuales queremos generar las gráficas
 COLUMNS_TO_PLOT = ['cpu_usage_latest', 'memory_usage_gb_latest']
