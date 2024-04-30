@@ -96,7 +96,7 @@ def main():
         print(f"Docker image built successfully: {result_build}")
 
         # Ejecutar un contenedor Docker a partir de la imagen construida
-        run_command = f"sudo docker run -d my_docker_image"
+        run_command = f"sudo docker run -d -p 8081:8081 my_docker_image"
         result_run = subprocess.run(run_command, shell=True, check=True, text=True, capture_output=True)
         container_id = result_run.stdout.strip()
         print(f"Container launched successfully with ID: {container_id}")
@@ -112,6 +112,19 @@ def main():
             print(f"Fetching data, please wait {constants.SAMPLING_TIME} seconds.")
             start_time = time.time()
             while time.time() - start_time < constants.SAMPLING_TIME:
+                
+                if (time.time() - start_time) <= 32 and (time.time() - start_time) >= 30:
+                    print("\n########## Entering apipecker part ##########\n")
+                    print("\t aprox.", str((time.time() - start_time)))
+                    try:
+
+                        print("##### Executing apipecker #####")
+                        exec_result = subprocess.run(constants.APIPECKER_EXEC_COMMAND, shell=True, check=True, text=True, capture_output=True)
+                        print(exec_result.stdout)
+
+                    except subprocess.CalledProcessError as e:
+                        print(f"Error executing apipecker: {e}")
+                
                 fetch_and_store_data(container_id, container_data)
                 time.sleep(constants.SAMPLING_RATE)
 
@@ -131,5 +144,5 @@ def main():
         print(f"Error in command: {e}")
 
 if __name__ == '__main__':
-    for _ in range(1):
+    for _ in range(10):
         main()

@@ -95,12 +95,13 @@ def main():
             print(f"Fetching data, please wait {constants.SAMPLING_TIME} seconds.")
             start_time = time.time()
             while time.time() - start_time < constants.SAMPLING_TIME:
-                fetch_and_store_data(container_id, container_data)
-                time.sleep(constants.SAMPLING_RATE)
+                
 
                 # Dejamos esto asi para sacar pruebas
-                if (time.time() - start_time) < 32 and (time.time() - start_time) > 30:
+                
+                if (time.time() - start_time) <= 32 and (time.time() - start_time) >= 30:
                     print("\n########## Entering apipecker part ##########\n")
+                    print("\t aprox.", str((time.time() - start_time)))
                     try:
 
                         print("##### Showing the scenario #####")
@@ -118,7 +119,8 @@ def main():
                             for line in output_lines:
                                 # Aquí asumimos que cada línea de la salida se puede dividir en columnas para el CSV
                                 # Deberás ajustar el delimitador y el procesamiento según la salida real de apipecker
-                                writer.writerow(line.split())  # Reemplaza split() con el método de procesamiento adecuado
+                                writer.writerow(line.split())  
+                            
 
                         print(f"Output saved to apipecker_output.csv")
                         print(exec_result.stdout)
@@ -127,6 +129,9 @@ def main():
                         print(f"{constants.KATHARA_EXEC_COMMAND} executed successfully: {exec_result}")
                     except subprocess.CalledProcessError as e:
                         print(f"Error executing command in Kathara device: {e}")
+                
+                fetch_and_store_data(container_id, container_data)
+                time.sleep(constants.SAMPLING_RATE)
 
             #plots.generate_cpu_graph(container_data)
             #plots.generate_memory_graph(container_data)
@@ -142,5 +147,5 @@ def main():
         print(f"Error in command: {e}")
 
 if __name__ == '__main__':
-    for _ in range(1):
+    for _ in range(10):
         main()
