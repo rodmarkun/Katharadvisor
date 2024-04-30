@@ -111,19 +111,19 @@ def main():
                         print("##### Executing apipecker #####")
                         exec_result = subprocess.run(constants.KATHARA_EXEC_COMMAND, shell=True, check=True, text=True, capture_output=True)
                         # exec_result.stdout has the data I need
-                        output_lines = exec_result.stdout.strip().split('\n')
+                        #output_lines = exec_result.stdout.strip().split('\n')
 
                         # Saving apipecker result in the csv file
-                        with open(f"./data/apipecker-{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.csv", mode='w', newline='') as file:
-                            writer = csv.writer(file)
-                            for line in output_lines:
+                        #with open(f"./data/apipecker-{datetime.now().strftime('%Y-%m-%d-%H:%M:%S')}.csv", mode='w', newline='') as file:
+                            #writer = csv.writer(file)
+                            #for line in output_lines:
                                 # Aquí asumimos que cada línea de la salida se puede dividir en columnas para el CSV
                                 # Deberás ajustar el delimitador y el procesamiento según la salida real de apipecker
-                                writer.writerow(line.split())  
+                                #writer.writerow(line.split())  
                             
 
-                        print(f"Output saved to apipecker_output.csv")
-                        print(exec_result.stdout)
+                        #print(f"Output saved to apipecker_output.csv")
+                        #print(exec_result.stdout)
                         if result.stderr:
                             print(f"Error: {result.stderr}")
                         print(f"{constants.KATHARA_EXEC_COMMAND} executed successfully: {exec_result}")
